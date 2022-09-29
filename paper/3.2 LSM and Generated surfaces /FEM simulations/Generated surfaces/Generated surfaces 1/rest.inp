@@ -1,0 +1,111 @@
+**
+** MATERIALS
+**
+**
+**sample2_mat
+**
+*MATERIAL, NAME=sample2_mat
+*ELASTIC, TYPE=ISOTROPIC
+                 21000.,                      0.3
+*DENSITY
+7850e-18
+**
+**sample1_mat
+**
+*MATERIAL, NAME=sample1_mat
+*ELASTIC, TYPE=ISOTROPIC
+                 21000.,                      0.3
+*DENSITY
+7850e-18
+**
+** 
+**
+** ------------------------------------------------------------------------
+** SURFACE INTERACTIONS
+**
+*SURFACE INTERACTION, NAME=SURF_INTERACTION
+1.,
+*FRICTION
+0.1,
+*Surface Behavior, pressure-overclosure=HARD
+**
+** CONTACT and TIE DEFINITIONS 
+**
+*CONTACT PAIR, INTERACTION=SURF_INTERACTION, TYPE=SURFACE TO SURFACE
+sample1_roughFacets, sample2_roughFacets
+** ------------------------------------------------------------------------
+**
+** BOUNDARY CONDITIONS
+** 
+** for bottom volume **
+*Boundary
+sample2_smooth, ENCASTRE
+*Boundary
+sample2_Xmin, 1, 1
+*Boundary
+sample2_Xmax, 1, 1
+*Boundary
+sample2_Ymin, 2, 2
+*Boundary
+sample2_Ymax, 2, 2
+** for top volume **
+*Boundary
+sample1_Xmin, 1, 1
+*Boundary
+sample1_Xmax, 1, 1
+*Boundary
+sample1_Ymin, 2, 2
+*Boundary
+sample1_Ymax, 2, 2
+**
+** ----------------------------------------------------------------
+** 
+** STEP: load
+** 
+*Step, name=load, nlgeom=yes
+*Dynamic,application=QUASI-STATIC,initial=NO
+0.1,  1., 1e-10, 5e-2
+**
+** BOUNDARY CONDITIONS
+**
+** Name: Disp-BC-load Type: Displacement/Rotation
+*Boundary
+sample1_smooth, 3, 3, 2.0
+**
+*Adaptive Mesh, elset=sample1, controls=Ada-1, frequency=3, mesh sweeps=10, op=NEW
+*Adaptive Mesh, elset=sample2, controls=Ada-1, frequency=3, mesh sweeps=10, op=MOD
+** 
+** CONTROLS
+** 
+*Controls, reset
+*Controls, parameters=time incrementation
+20, 20, , , , , , 20, , , 
+*Controls, parameters=line search
+20, , , ,
+**
+** OUTPUT REQUESTS
+**
+*Restart, write, frequency=0
+**
+** FIELD OUTPUT: F-Output-1
+**
+*Output, field, variable=PRESELECT
+**
+** HISTORY OUTPUT: contact stresses
+**
+*Output, history, frequency=1
+*Contact Output, surface=sample1_roughFacets
+CPRESS, CAREA
+**
+** HISTORY OUTPUT - clearance
+**
+*Output, history, frequency=1
+*Node Output, nset=sample1_rough
+U3, COOR3
+*Node Output, nset=sample2_rough
+U3, COOR3
+*Node Output, nset=sample2_smooth
+RF1, RF2, RF3
+*Node output, nset=sample1_smooth
+U3
+*End Step
